@@ -16,31 +16,66 @@ const AppDescription = () => (
 );
 
 class App extends React.Component {
-  state = {
-    status: "off",
-    time: null,
-    timer: null,
-  };
 
-  formatTime = (time) => {
-    let minutes = Math.floor(time / 60);
-    let seconds = Math.floor(time - minutes * 60);
+    state = {
+        status: 'off',
+        time: null,
+        timer: null,
+      };
 
-    if (minutes < 10) {
-      minutes = "0" + minutes;
-    }
-    if (seconds < 10) {
-      seconds = "0" + seconds;
-    }
-  };
 
-  step = () => {};
+      formatTime = time => {
+        let minutes = Math.floor(time / 60);
+        let seconds = Math.floor(time - minutes * 60);
+    
+        if (minutes < 10) { minutes = "0" + minutes; }
+        if (seconds < 10) { seconds = "0" + seconds; }
+        return minutes + ':' + seconds;
+      };
+    
+      step = () => {
+        this.setState({time: this.state.time - 1});
+        if (this.state.time === 0) {
+          this.playBell();
+          if (this.state.status === 'work') {
+            this.setState({
+              status: 'rest',
+              time: 20,
+            })
+          } else if (this.state.status === 'rest') {
+            this.setState({
+              status: 'work',
+              time: 1200,
+            });
+          };
+        }
+        console.log(time);
+      };
+    
+      startTimer = () => {
+        this.setState({
+          timer: setInterval(this.step, 1000),
+          time: 1200,
+          status: 'work',
+        });
+      };
 
-  startTimer = () => {
-    this.setState({
-      timer: setInterval(this.step, 1000),
-    });
-  };
+      stopTimer = () => {
+        this.setState({
+          timer: clearInterval(this.state.timer),
+          time: 0,
+          status: 'off',
+        });
+      };
+
+      closeApp = () => {
+        window.close();
+      };
+
+      playBell = () => {
+        const bell = new Audio('./sounds/b.wav');
+        bell.play();
+      };
 
   render() {
     const { status } = this.state;
@@ -48,13 +83,13 @@ class App extends React.Component {
     return (
       <div>
         <h1>Protect your eyes</h1>
-        {status === "off" && <AppDescription />}
-        {status === "work" && <img src="./images/work.png" />}
-        {status === "rest" && <img src="./images/rest.png" />}
-        {status !== "off" && <div className="timer">18:23</div>}
-        {status === "off" && <button className="btn">Start</button>}
-        {status !== "off" && <button className="btn">Stop</button>}
-        <button className="btn btn-close">X</button>
+        {(status === 'off') && <AppDescription />}
+        {(status === 'work') && <img src="./images/work.png" />}
+        {(status === 'rest') && <img src="./images/rest.png" />}
+        {(status !== 'off') && <div className="timer">{this.formatTime(this.state.time)}</div>}
+        {(status === 'off') && <button className="btn" onClick={() => this.startTimer()}>Start</button>}
+        {(status !== 'off') && <button className="btn" onClick={() => this.stopTimer()}>Stop</button>}
+        <button className="btn btn-close" onClick={() => this.closeApp()}>X</button>
       </div>
     );
   }
